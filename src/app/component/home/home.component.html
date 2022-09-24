@@ -1,0 +1,34 @@
+<div class="container" id="root">
+  <div class="row">
+
+    <form [formGroup]="form">
+
+      <!-- Columnas -->
+      <div class="form-group">
+        <label for="column">Columnas:</label>
+        <input type="number" class="form-control" id="column" formControlName="column"
+               placeholder="Columnas:"/>
+      </div>
+
+      <!-- Filas -->
+      <div class="form-group">
+        <label for="row">Filas:</label>
+        <input type="number" class="form-control" id="row" placeholder="Filas:" formControlName="row"/>
+      </div>
+
+      <!-- Pozos -->
+      <div class="form-group">
+        <label for="pit">Pozos:</label>
+        <input type="number" class="form-control" id="pit" placeholder="Pozos:" formControlName="pit"/>
+      </div>
+
+      <!-- Flechas -->
+      <div class="form-group">
+        <label for="arrow">Flechas:</label>
+        <input type="number" class="form-control" id="arrow" placeholder="Flechas:" formControlName="arrow"/>
+      </div>
+
+      <button type="submit" class="btn btn-primary" (click)="start()">Iniciar</button>
+    </form>
+  </div>
+</div>

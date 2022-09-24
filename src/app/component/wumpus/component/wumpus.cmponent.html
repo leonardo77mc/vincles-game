@@ -1,0 +1,124 @@
+<div class="container" id="root-container">
+  <div class="row">
+    <div class="col">
+      <h1>{{title}}</h1>
+      <p class="lead text-muted">Navega por la mazmorra. Evite los hoyos. Encuentra el oro. ¡Cuidado con los Wumpus!</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Contenedor del mapa  -->
+    <div class="col">
+      <div id="root">
+
+        <div class="grid-container">
+          <div class="grid-item text-center p-1" *ngFor="let column of map; let counter=index">
+            <div class="grid-item text-center p-1" *ngFor="let row of column">
+              <i class="{{ row.icon.pit }} fa-2xs" *ngIf="row['pit']['exist']"></i>
+              <i class="{{ row.icon.breeze }} fa-2xs" *ngIf="row['breeze']"></i>
+              <i class="{{ row.icon.stench }} fa-2xs" *ngIf="row['stench']" style="border: red;"></i>
+              <i class="{{ row.icon.arrow }} fa-2xs" *ngIf="row['arrow']"></i>
+              <i class="fa-2xs" *ngIf="row['exit']"></i>
+              <img class="fa-2xs" *ngIf="row.wumpus" src="assets/wumpus.png" height="62">
+              <ng-lottie *ngIf="row.gold" class="fa-2xs" [options]="optionsGold" width="31px" height="31px"></ng-lottie>
+
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-donw':
+              pressDown}" *ngIf="row.hunter && !pressDown && !pressUp && !pressLeft && !pressRight" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-donw': pressDown}" *ngIf="row.hunter && pressDown" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-up': pressUp}" *ngIf="row.hunter && pressUp" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-left': pressLeft}" *ngIf="row.hunter && pressLeft" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-right': pressRight}" *ngIf="row.hunter && pressRight" src="assets/hunter.png" height="57">
+
+            </div>
+          </div>
+        </div>
+        <!--
+        <div class="grid-container">
+
+          <div class="grid-item text-center p-1" *ngFor="let item of mapGlobal">
+            <div>
+
+              <i class="fa-2xs" *ngIf="item.arrow"></i>
+              <i class="fa-2xs" *ngIf="item.breeze"></i>
+              <i class="fa-2xs" *ngIf="item.gold"></i>
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-donw':
+              pressDown}" *ngIf="item.hunter && !pressDown && !pressUp && !pressLeft && !pressRight" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-donw': pressDown}" *ngIf="item.hunter && pressDown" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-up': pressUp}" *ngIf="item.hunter && pressUp" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-left': pressLeft}" *ngIf="item.hunter && pressLeft" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-right': pressRight}" *ngIf="item.hunter && pressRight" src="assets/hunter.png">
+              <i class="fa-2xs" *ngIf="item.pit.exist"></i>
+              <i class="fa-2xs" *ngIf="item.stench" style="border: red;"></i>
+              <i class="fa-2xs" *ngIf="item.wumpus" src="assets/wumpus.png"></i>
+
+              <i class="{{ item.icon.arrow }} fa-2xs" *ngIf="item.arrow"></i>
+              <i class="{{ item.icon.breeze }} fa-2xs" *ngIf="item.breeze"></i>
+              <i class="{{ item.icon.gold }} fa-2xs" *ngIf="item.gold"></i>
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-donw':
+              pressDown}" *ngIf="item.hunter && !pressDown && !pressUp && !pressLeft && !pressRight"
+                   src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-donw': pressDown}"
+                   *ngIf="item.hunter && pressDown" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-up': pressUp}" *ngIf="item.hunter && pressUp"
+                   src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-left': pressLeft}"
+                   *ngIf="item.hunter && pressLeft" src="assets/hunter.png">
+              <img class="fa-2xs" [ngClass]="{'hunter': item.hunter, 'move-right': pressRight}"
+                   *ngIf="item.hunter && pressRight" src="assets/hunter.png">
+              <i class="{{ item.icon.pit }} fa-2xs" *ngIf="item.pit.exist"></i>
+              <i class="{{ item.icon.stench }} fa-2xs" *ngIf="item.stench" style="border: red;"></i>
+              <img class="fa-2xs" *ngIf="item.wumpus" src="assets/wumpus.png">
+
+            </div>
+          </div>
+        </div>
+        -->
+
+      </div>
+    </div>
+
+    <div class="col-3">
+      <fieldset class="instructions">
+        <legend>Percepciones</legend>
+        <div class="row">
+          <div class="col-1">
+            <ng-lottie [options]="optionsBreeze" width="47px" height="47px"
+                       (animationCreated)="animationCreated($event, 'breeze')"></ng-lottie>
+          </div>
+          <div class="col percept">
+            <p>Sientes una brisa, un pozo está cerca.</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-1">
+            <ng-lottie [options]="optionsWumpus" width="47px" height="47px"
+                       (animationCreated)="animationCreated($event, 'radar')"></ng-lottie>
+          </div>
+          <div class="col percept">
+            <p>Hueles un hedor, el wumpus está cerca.</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-1">
+            <ng-lottie [options]="optionsExit" width="47px" height="47px"
+                       (animationCreated)="animationCreated($event, 'exit')"></ng-lottie>
+          </div>
+          <div class="col percept">
+            <p>{{exitAlert}}</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-1">
+            <ng-lottie [options]="optionsArrow" width="47px" height="47px"></ng-lottie>
+          </div>
+          <div class="col percept">
+            <p>Flechas disponibles: {{countArrow}}</p>
+          </div>
+        </div>
+
+      </fieldset>
+    </div>
+  </div>
+</div>

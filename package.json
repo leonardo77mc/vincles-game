@@ -4,9 +4,10 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration=production --configuration production --build-optimizer --deploy-url /cincle-wumpus-game/ --base-href /cincle-wumpus-game/",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "compodoc": "npx compodoc -p tsconfig.doc.json"
   },
   "private": true,
   "dependencies": {
@@ -18,7 +19,14 @@
     "@angular/platform-browser": "^14.1.0",
     "@angular/platform-browser-dynamic": "^14.1.0",
     "@angular/router": "^14.1.0",
+    "@fortawesome/fontawesome-svg-core": "^6.2.0",
+    "@fortawesome/free-brands-svg-icons": "^6.2.0",
+    "@fortawesome/free-regular-svg-icons": "^6.2.0",
+    "@fortawesome/free-solid-svg-icons": "^6.2.0",
+    "lottie-web": "^5.9.6",
+    "ngx-lottie": "^9.0.1",
     "rxjs": "~7.5.0",
+    "sweetalert2": "^11.4.33",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },
