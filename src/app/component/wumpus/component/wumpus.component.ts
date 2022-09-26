@@ -14,7 +14,7 @@ import { ActivatedRoute } from "@angular/router";
 export class WumpusComponent implements OnInit {
 
   title = 'Wumpus World';
-  exitAlert = 'Salida';
+  exitAlert = 'Estas en la salida, pero te hace falta el oro!';
 
   public map;
   public countArrow: number = 0;
@@ -68,16 +68,23 @@ export class WumpusComponent implements OnInit {
     arrow: 0
   };
 
-  /** Flechas para el cazador */
-  // public arrows: number;
-  /** Pozos */
-  // public pits: number;
   /** Reglas del juego */
   private rules: IRules[] = [];
   pressRight: boolean;
   pressDown: boolean;
   pressLeft: boolean;
   pressUp: boolean;
+
+  /** Banderas para percibir */
+  public perceptBreeze: boolean = false;
+  public perceptStench: boolean = false;
+  public perceptExit: boolean = false;
+  public perceptArrow: boolean = false;
+  public perceptGold: boolean = false;
+  public perceptbrightness: boolean = false;
+
+  // bandera para mostrar u ocultar los iconos.
+  public showIcons: boolean = false;
 
   constructor(private ngZone: NgZone, private readonly _activateRoute: ActivatedRoute) {
     this.pressRight = false;
@@ -158,7 +165,10 @@ export class WumpusComponent implements OnInit {
             hunter: 'Icono sin definir, no encontre un fontAwesome que molara',
             exit: 'fa-sharp fa-solid fa-door-open'
           },
-          exit: false
+          // Salida
+          exit: false,
+          // Brillo del oro
+          brightness: false
         };
       }
     }
@@ -181,21 +191,8 @@ export class WumpusComponent implements OnInit {
       };
     }
 
-    this.addBreezeOnMap('Horizontal');
-    this.addBreezeOnMap('Vertical');
-  }
-
-  /**
-   * Metodo que agregar las brizas dependiendo de la ubicacion del pozo.
-   * @param {string} orientation
-   * @return void
-   */
-  addBreezeOnMap(orientation: string): void {
-    if (orientation === 'Horizontal') {
-      this.cellTourHorizontal('pit');
-    } else {
-      this.cellTourVertical('pit')
-    }
+    this.addResources('Horizontal', 'pit');
+    this.addResources('Vertical', 'pit');
   }
 
   /**
@@ -203,7 +200,7 @@ export class WumpusComponent implements OnInit {
    * @return void
    */
   loadTheHunterOnTheMap(): void {
-    for (let column = 0; column < this.params.row; column++) {
+    for (let column = parseInt(String(Math.random() * this.params.row)); column < this.params.row; column++) {
       const row = parseInt(String(Math.random() * this.params.column));
       if (
         !this.map[row][column]['pit']['exist'] &&
@@ -227,7 +224,7 @@ export class WumpusComponent implements OnInit {
    * @return void
    */
   loadTheWumpusOnTheMap(): void {
-    for (let column = 0; column < this.params.row; column++) {
+    for (let column = parseInt(String(Math.random() * this.params.row)); column < this.params.row; column++) {
       const row = parseInt(String(Math.random() * this.params.column));
       if (!this.map[row][column]['pit']['exist'] && !this.map[row][column]['breeze']) {
         this.map[row][column]['wumpus'] = true;
@@ -236,8 +233,8 @@ export class WumpusComponent implements OnInit {
         continue;
       }
     }
-    this.addStechOnWumpus('Horizontal');
-    this.addStechOnWumpus('Vertical');
+    this.addResources('Horizontal', 'wumpus');
+    this.addResources('Vertical', 'wumpus');
   }
 
   /**
@@ -245,7 +242,7 @@ export class WumpusComponent implements OnInit {
    * @return void
    */
   loadTheGoldOnTheMap(): void {
-    for (let column = 0; column < this.params.column; column++) {
+    for (let column = parseInt(String(Math.random() * this.params.row)); column < this.params.column; column++) {
       const row = parseInt(String(Math.random() * this.params.column));
       if (!this.map[row][column]['pit']['exist'] && !this.map[row][column]['wumpus']) {
         this.map[row][column]['gold'] = true;
@@ -254,6 +251,8 @@ export class WumpusComponent implements OnInit {
         continue;
       }
     }
+    this.addResources('Horizontal', 'gold');
+    this.addResources('Vertical', 'gold');
   }
 
   /**
@@ -261,8 +260,8 @@ export class WumpusComponent implements OnInit {
    * @return void
    */
   loadTheArrowOnTheMap(): void {
-    for (let i = 0; i < 7; i++) {
-      for (let column = 0; column < Number(this.params.arrow); column++) {
+    for (let i = 0; i < this.params.arrow; i++) {
+      for (let column = parseInt(String(Math.random() * this.params.row)); column < Number(this.params.arrow); column++) {
         const row = parseInt(String(Math.random() * this.params.column));
         if (
           !this.map[row][column]['pit']['exist'] &&
@@ -278,17 +277,21 @@ export class WumpusComponent implements OnInit {
   }
 
   /**
-   * Metodo que agregar las brizas dependiendo de la ubicacion del pozo.
+   * Metodo que agregar brisas, hedor, o brillo en el mapa de acuerdo a la orientacion.
    * @param {string} orientation
    * @return void
    */
-  addStechOnWumpus(orientation: string): void {
+  addResources(orientation: string, property): void {
     if (orientation === 'Horizontal') {
-      this.cellTourHorizontal('wumpus');
+      this.cellTourHorizontal(property);
     } else {
-      this.cellTourVertical('wumpus');
+      this.cellTourVertical(property);
     }
   }
+
+  /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  /*::::::::::::::::::::Movimientos del jugador::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
   /**
    * Metodo que controla los movimientos del cazador hacia la derecha.
@@ -296,7 +299,7 @@ export class WumpusComponent implements OnInit {
    */
   @HostListener('document:keydown.control.ArrowRight', ['$event'])
   hunterMovesRight(press: KeyboardEvent): void {
-    this.searchHunter('Vertical', press.key);
+    this.searchHunter('Vertical', false, false, false, true);
   }
 
   /**
@@ -305,7 +308,7 @@ export class WumpusComponent implements OnInit {
    */
   @HostListener('document:keydown.control.ArrowLeft', ['$event'])
   hunterMovesLeft(press: KeyboardEvent): void {
-    this.searchHunter('Vertical.', press.key);
+    this.searchHunter('Vertical', false, false, true, false);
   }
 
   /**
@@ -314,7 +317,7 @@ export class WumpusComponent implements OnInit {
    */
   @HostListener('document:keydown.control.ArrowUp', ['$event'])
   hunterMovesUp(press: KeyboardEvent): void {
-    this.searchHunter('Horizontal', press.key);
+    this.searchHunter('Horizontal', true, false, false, false);
   }
 
   /**
@@ -323,7 +326,7 @@ export class WumpusComponent implements OnInit {
    */
   @HostListener('document:keydown.control.ArrowDown', ['$event'])
   hunterMovesDown(press: KeyboardEvent): void {
-    this.searchHunter('Horizontal', press.key);
+    this.searchHunter('Horizontal', false, true, false, false);
   }
 
   /**
@@ -332,50 +335,29 @@ export class WumpusComponent implements OnInit {
    * @param {string} key
    * @return void
    */
-  searchHunter(orientation: string, key: string): void {
-    if (orientation === 'Horizontal') {
-      let pressSuccess = false;
-      for (let column = 0; column < this.params.row; column++) {
-        for (let row = 0; row < this.params.column; row++) {
-          if (this.map[row][column]['hunter']) {
-            switch (key) {
-              case 'ArrowUp':
-                this.keyMove(row, column, true, false, false, false, 'Horizontal');
-                break;
-              case 'ArrowDown':
-                this.keyMove(row, column, false, true, false, false, 'Horizontal');
-                break;
-              default:
-            }
-            pressSuccess = true;
-            break;
-          }
+  searchHunter(
+    orientation: string,
+    pressUp: boolean,
+    pressDown: boolean,
+    pressLeft: boolean,
+    pressRight: boolean
+  ): void {
+    let pressSuccess = false;
+    for (let column = 0; column < this.params.row; column++) {
+      for (let row = 0; row < this.params.column; row++) {
+        if (this.map[row][column]['hunter'] && orientation === 'Horizontal') {
+          this.keyMove(row, column, pressUp, pressDown, pressLeft, pressRight, orientation);
+          pressSuccess = true;
+          break;
         }
-        if (pressSuccess) {
+        if (this.map[row][column]['hunter'] && orientation === 'Vertical') {
+          this.keyMove(column, row, pressUp, pressDown, pressLeft, pressRight, orientation);
+          pressSuccess = true;
           break;
         }
       }
-    } else {
-      let pressSuccess = false;
-      for (let column = 0; column < this.params.row; column++) {
-        for (let row = 0; row < this.params.column; row++) {
-          if (this.map[row][column]['hunter']) {
-            switch (key) {
-              case 'ArrowRight':
-                this.keyMove(column, row, false, false, false, true, 'Vertical');
-                break;
-              case 'ArrowLeft':
-                this.keyMove(column, row, false, false, true, false, 'Vertical');
-                break;
-              default:
-            }
-            pressSuccess = true;
-            break;
-          }
-        }
-        if (pressSuccess) {
-          break;
-        }
+      if (pressSuccess) {
+        break;
       }
     }
   }
@@ -398,35 +380,64 @@ export class WumpusComponent implements OnInit {
 
     if (this.map[column][row]['breeze']) {
       console.log('Sientes una brisa');
-      this.play('breeze');
+      this.perceptBreeze = true;
     } else {
-      this.stop('breeze');
+      this.perceptBreeze = false;
+    }
+
+    if (!this.selectGold) {
+      if (this.map[column][row]['brightness']) {
+        console.log('Sientes el brillo, el oro esta cerca.');
+        this.perceptbrightness = true;
+      } else {
+        this.perceptbrightness = false;
+      }
     }
 
     if (this.map[column][row]['stench']) {
       console.log('Sientes en un hedor');
-      this.play('radar');
+      this.perceptStench = true;
     } else {
-      this.stop('radar');
+      this.perceptStench = false;
     }
 
     if (this.map[column][row]['gold']) {
       this.selectGold = true;
+      this.perceptGold = true;
+    } else {
+      this.perceptGold = false;
     }
 
     if (this.map[column][row]['arrow']) {
       this.countArrow++;
+      this.perceptArrow = true;
       console.log('Encontrastes una flecha');
+    } else {
+      this.perceptArrow = false;
     }
 
-    if(this.map[column][row]['exit'] && !this.selectGold) {
+    if (this.map[column][row]['exit'] && !this.selectGold) {
       this.exitAlert = 'Estas en la salida, pero te hace falta el oro!';
-    }
-    else if(this.map[column][row]['exit'] && this.selectGold) {
+      this.perceptExit = true;
+    } else if (this.map[column][row]['exit'] && this.selectGold) {
+      this.exitAlert = 'Encontraste el oro y regresaste a la salida, ganaste!!';
       this.messageSuccess('Winner!!', 'Encontraste el oro y regresaste a la salida, ganaste!!');
+      this.perceptExit = true;
     } else {
-      this.exitAlert = 'Salida';
+      this.perceptExit = false;
     }
+  }
+
+  /**
+   * Metodo para detener la animacion con retraso.
+   * @param {string} property
+   * @param {number} delay
+   * @return void
+   */
+  stopAnimation(property: string, delay: number): void {
+    setTimeout(() => {
+      this[property] = false;
+    }, delay);
   }
 
   /**
@@ -443,7 +454,7 @@ export class WumpusComponent implements OnInit {
       showCancelButton: false,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Reset'
+      confirmButtonText: 'Cerrar'
     }).then((result) => {
       location.reload();
     })
@@ -463,7 +474,7 @@ export class WumpusComponent implements OnInit {
       showCancelButton: false,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Reset'
+      confirmButtonText: 'Cerrar'
     }).then((result) => {
       location.reload();
     })
@@ -562,6 +573,11 @@ export class WumpusComponent implements OnInit {
         this.map[column][row]['stench'] = true;
         this.map[column][row]['pit']['exist'] = false;
         break;
+      case 'gold':
+        this.map[column][row]['brightness'] = true;
+        this.map[column][row]['pit']['exist'] = false;
+        break;
+      default:
     }
   }
 
@@ -583,6 +599,11 @@ export class WumpusComponent implements OnInit {
         this.map[row][column]['stench'] = true;
         this.map[row][column]['pit']['exist'] = false;
         break;
+      case 'gold':
+        this.map[row][column]['brightness'] = true;
+        this.map[row][column]['pit']['exist'] = false;
+        break;
+      default:
     }
   }
 
@@ -669,7 +690,7 @@ export class WumpusComponent implements OnInit {
     pressDown: boolean,
     pressLeft: boolean,
     pressRight: boolean,
-    type: string
+    orientation: string,
   ): void {
     try {
       this.pressUp = pressUp;
@@ -678,19 +699,21 @@ export class WumpusComponent implements OnInit {
       this.pressRight = pressRight;
       let rowPos = 0;
       let cell: any = null;
-      if (type === 'Horizontal') {
+      if (orientation === 'Horizontal') {
         if (pressDown) {
           rowPos = row + 1;
         } else {
           rowPos = row - 1
         }
         this.execRules(column, rowPos);
-        this.map[column][rowPos]['pit']['exist'] = false;
-        this.map[column][rowPos]['breeze'] = false;
-        this.map[column][rowPos]['stench'] = false;
-        this.map[column][rowPos]['arrow'] = false;
-        this.map[column][rowPos]['gold'] = false;
-        this.map[column][rowPos]['wumpus'] = false;
+        if (this.showIcons) {
+          this.map[column][rowPos]['pit']['exist'] = false;
+          this.map[column][rowPos]['breeze'] = false;
+          this.map[column][rowPos]['stench'] = false;
+          this.map[column][rowPos]['arrow'] = false;
+          this.map[column][rowPos]['gold'] = false;
+          this.map[column][rowPos]['wumpus'] = false;
+        }
         this.map[column][rowPos]['hunter'] = true;
         this.map[column][row]['hunter'] = false;
       } else {
@@ -700,12 +723,14 @@ export class WumpusComponent implements OnInit {
           rowPos = row - 1
         }
         this.execRules(rowPos, column);
-        this.map[rowPos][column]['pit']['exist'] = false;
-        this.map[rowPos][column]['breeze'] = false;
-        this.map[rowPos][column]['stench'] = false;
-        this.map[rowPos][column]['arrow'] = false;
-        this.map[rowPos][column]['gold'] = false;
-        this.map[rowPos][column]['wumpus'] = false;
+        if (this.showIcons) {
+          this.map[rowPos][column]['pit']['exist'] = false;
+          this.map[rowPos][column]['breeze'] = false;
+          this.map[rowPos][column]['stench'] = false;
+          this.map[rowPos][column]['arrow'] = false;
+          this.map[rowPos][column]['gold'] = false;
+          this.map[rowPos][column]['wumpus'] = false;
+        }
         this.map[rowPos][column]['hunter'] = true;
         this.map[row][column]['hunter'] = false;
       }
@@ -718,11 +743,19 @@ export class WumpusComponent implements OnInit {
    * Metodo para disparar las flechas.
    * @return void
    */
- shootArrow(): void {
+  shootArrow(): void {
     // Todo para matar al Wumpus se usaria la misma logica de caminar,
     //  simulando un paso, verificando en la posicion si existe el wumpus, si no existe
     //  usar una resta para mantener la posicion de tiro, si el wumpus si esta en la posicion
     //  notificar su muerte y posterior mensaje de victoria.
- }
+  }
+
+  show() {
+    if (this.showIcons) {
+      this.showIcons = false;
+    } else {
+      this.showIcons = true;
+    }
+  }
 
 }

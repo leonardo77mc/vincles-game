@@ -121,8 +121,12 @@ fieldset.instructions {
   margin-left: 5px;
 
 p {
-  padding-top: 9px;
-  padding-left: 10px;
+  padding-top: 0px;
+  padding-left: 7px;
+}
+
+#arrow {
+  padding-top: 0.7rem;
 }
 
 }
@@ -217,20 +221,19 @@ footer {
   font-size: 30px;
   text-align: center;
   min-height: 80px;
-
-  .fa-arrow-up-from-bracket {
-    margin-left: 30.7%;
-    color: red;
-  }
-
-  .fa-water {
-    color: blue;
-  }
-
 }
 
 .hunter {
   cursor: pointer;
+}
+
+.fa-arrow-up-from-bracket {
+  margin-left: 30.7%;
+  color: red;
+}
+
+.fa-water {
+  color: blue;
 }
 
 .fa-skull-crossbones {
@@ -267,3 +270,13 @@ footer {
   transform: rotate(360deg);
 }
 
+.precent-icon {
+  i {
+    font-size: 25px;
+    margin-top: 13.5px;
+  }
+
+  #gold {
+    margin-top: 1.57rem;
+  }
+}

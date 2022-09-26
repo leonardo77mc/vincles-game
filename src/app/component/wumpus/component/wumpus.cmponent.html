@@ -14,20 +14,38 @@
         <div class="grid-container">
           <div class="grid-item text-center p-1" *ngFor="let column of map; let counter=index">
             <div class="grid-item text-center p-1" *ngFor="let row of column">
-              <i class="{{ row.icon.pit }} fa-2xs" *ngIf="row['pit']['exist']"></i>
-              <i class="{{ row.icon.breeze }} fa-2xs" *ngIf="row['breeze']"></i>
-              <i class="{{ row.icon.stench }} fa-2xs" *ngIf="row['stench']" style="border: red;"></i>
-              <i class="{{ row.icon.arrow }} fa-2xs" *ngIf="row['arrow']"></i>
+
+              <i class="fa-2xs" *ngIf="row['pit']['exist'] && !showIcons"></i>
+              <i class="{{ row.icon.pit }} fa-2xs" *ngIf="row['pit']['exist'] && showIcons"></i>
+
+              <i class="fa-2xs" *ngIf="row['breeze'] && !showIcons"></i>
+              <i class="{{ row.icon.breeze }} fa-2xs" *ngIf="row['breeze'] && showIcons"></i>
+
+              <i class="fa-2xs" *ngIf="row['stench'] && !showIcons"></i>
+              <i class="{{ row.icon.stench }} fa-2xs" *ngIf="row['stench'] && showIcons"></i>
+
+              <i class="fa-2xs" *ngIf="row['arrow'] && !showIcons"></i>
+              <i class="{{ row.icon.arrow }} fa-2xs" *ngIf="row['arrow'] && showIcons"></i>
+
               <i class="fa-2xs" *ngIf="row['exit']"></i>
-              <img class="fa-2xs" *ngIf="row.wumpus" src="assets/wumpus.png" height="62">
-              <ng-lottie *ngIf="row.gold" class="fa-2xs" [options]="optionsGold" width="31px" height="31px"></ng-lottie>
+
+              <i class="fa-2xs" *ngIf="row.wumpus && !showIcons"></i>
+              <img class="fa-2xs" *ngIf="row.wumpus && showIcons" src="assets/wumpus.png" height="62">
+
+              <i *ngIf="row['gold'] && !showIcons" class="fa-2xs"></i>
+              <i *ngIf="row['gold'] && showIcons" class="{{row.icon.gold}} fa-2xs"></i>
 
               <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-donw':
-              pressDown}" *ngIf="row.hunter && !pressDown && !pressUp && !pressLeft && !pressRight" src="assets/hunter.png" height="57">
-              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-donw': pressDown}" *ngIf="row.hunter && pressDown" src="assets/hunter.png" height="57">
-              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-up': pressUp}" *ngIf="row.hunter && pressUp" src="assets/hunter.png" height="57">
-              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-left': pressLeft}" *ngIf="row.hunter && pressLeft" src="assets/hunter.png" height="57">
-              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-right': pressRight}" *ngIf="row.hunter && pressRight" src="assets/hunter.png" height="57">
+              pressDown}" *ngIf="row.hunter && !pressDown && !pressUp && !pressLeft && !pressRight"
+                   src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-donw': pressDown}"
+                   *ngIf="row.hunter && pressDown" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-up': pressUp}" *ngIf="row.hunter && pressUp"
+                   src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-left': pressLeft}"
+                   *ngIf="row.hunter && pressLeft" src="assets/hunter.png" height="57">
+              <img class="fa-2xs" [ngClass]="{'hunter': row.hunter, 'move-right': pressRight}"
+                   *ngIf="row.hunter && pressRight" src="assets/hunter.png" height="57">
 
             </div>
           </div>
@@ -81,42 +99,50 @@
       <fieldset class="instructions">
         <legend>Percepciones</legend>
         <div class="row">
-          <div class="col-1">
-            <ng-lottie [options]="optionsBreeze" width="47px" height="47px"
-                       (animationCreated)="animationCreated($event, 'breeze')"></ng-lottie>
+          <div class="col-1 precent-icon">
+            <i class="fas fa-water" [ngClass]="{'animate__heartBeat': perceptBreeze}"></i>
           </div>
           <div class="col percept">
-            <p>Sientes una brisa, un pozo está cerca.</p>
+            <p [ngClass]="{'animate__bounceIn': perceptBreeze}">Sientes una brisa, un pozo está cerca.</p>
           </div>
         </div>
         <div class="row">
-          <div class="col-1">
-            <ng-lottie [options]="optionsWumpus" width="47px" height="47px"
-                       (animationCreated)="animationCreated($event, 'radar')"></ng-lottie>
+          <div class="col-1 precent-icon">
+            <i class="fas fa-wind" [ngClass]="{'animate__heartBeat': perceptStench}"></i>
           </div>
           <div class="col percept">
-            <p>Hueles un hedor, el wumpus está cerca.</p>
+            <p [ngClass]="{'animate__bounceIn': perceptStench}">Hueles un hedor, el wumpus está cerca.</p>
           </div>
         </div>
 
         <div class="row">
-          <div class="col-1">
-            <ng-lottie [options]="optionsExit" width="47px" height="47px"
-                       (animationCreated)="animationCreated($event, 'exit')"></ng-lottie>
+          <div class="col-1 precent-icon">
+            <i class="fa-sharp fa-solid fa-door-open" [ngClass]="{'animate__heartBeat': perceptExit}"></i>
           </div>
           <div class="col percept">
-            <p>{{exitAlert}}</p>
+            <p [ngClass]="{'animate__bounceIn': perceptExit}">{{exitAlert}}</p>
           </div>
         </div>
 
         <div class="row">
-          <div class="col-1">
-            <ng-lottie [options]="optionsArrow" width="47px" height="47px"></ng-lottie>
+          <div class="col-1 precent-icon">
+            <i class="fas fa-thin fa-arrow-up-from-bracket" [ngClass]="{'animate__heartBeat': perceptArrow}"></i>
           </div>
           <div class="col percept">
-            <p>Flechas disponibles: {{countArrow}}</p>
+            <p id="arrow" [ngClass]="{'animate__bounceIn': perceptArrow}">Flechas disponibles: {{countArrow}}</p>
           </div>
         </div>
+
+        <div class="row">
+          <div class="col-1 precent-icon">
+            <i id="gold" class="fas fa-light fa-coins" [ngClass]="{'animate__heartBeat': perceptbrightness}"></i>
+          </div>
+          <div class="col percept">
+            <p id="arrow" [ngClass]="{'animate__bounceIn': perceptbrightness}">Hay mucho brillo, el oro esta cerca</p>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" (click)="show()">Mostrar iconos</button>
 
       </fieldset>
     </div>
